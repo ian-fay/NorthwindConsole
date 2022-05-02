@@ -24,7 +24,8 @@ namespace NorthwindConsole
                     Console.WriteLine("2) Add Category");
                     Console.WriteLine("3) Display Category and related products");
                     Console.WriteLine("4) Display all Categories and their related products");
-                    Console.WriteLine("5) Add Product.");
+                    Console.WriteLine("5) Add Product");
+                    Console.WriteLine("6) Edit Product");
                     Console.WriteLine("\"q\" to quit");
                     choice = Console.ReadLine();
                     Console.Clear();
@@ -91,6 +92,7 @@ namespace NorthwindConsole
                         }
                         Console.ForegroundColor = ConsoleColor.White;
                         int id = int.Parse(Console.ReadLine());
+
                         Console.Clear();
                         logger.Info($"CategoryId {id} selected");
                         Category category = db.Categories.Include("Products").FirstOrDefault(c => c.CategoryId == id);
@@ -114,36 +116,32 @@ namespace NorthwindConsole
                         }
                     }
                     else if(choice == "5") {
-                        Product product = new Product();
-                        Console.WriteLine("Enter Product Name:");
-                        product.ProductName = Console.ReadLine();
 
-                        ValidationContext context = new ValidationContext(product, null, null);
-                        List<ValidationResult> results = new List<ValidationResult>();
-                        var isValid = Validator.TryValidateObject(product, context, results, true);
-                        if (isValid)
-                        {
-                            var db = new NWConsole_48_IBFContext();
-                            // check for unique name
-                            if (db.Products.Any(p => p.ProductName == product.ProductName))
-                            {
-                                // generate validation error
-                                isValid = false;
-                                results.Add(new ValidationResult("Name exists", new string[] { "ProductName" }));
-                            }
-                            else
-                            {
-                                logger.Info("Validation passed");
-                                // TODO: save category to db
+                        var db = new NWConsole_48_IBFContext();
+                        Product product = InputProduct(db);
+                        if(product != null) {
+                            db.AddProduct(product);
+                            logger.Info("Product added - {name}", product.ProductName);
+                        }
+
+                    }
+                    else if(choice == "6") 
+                    {
+                        Console.WriteLine("Choose Product to Edit:");
+                        var db = new NWConsole_48_IBFContext();
+                        var product = GetProduct(db);
+                        
+                        if (product != null) {
+                            Product UpdatedProduct = InputProduct(db);
+                            if(UpdatedProduct != null) {
+                                UpdatedProduct.ProductId = product.ProductId;
+                                db.EditProduct(UpdatedProduct);
+                                logger.Info($"Product (ID: {product.ProductId}) updated.");
+                                Console.WriteLine("Product updated.");
                             }
                         }
-                        if (!isValid)
-                        {
-                            foreach (var result in results)
-                            {
-                                logger.Error($"{result.MemberNames.First()} : {result.ErrorMessage}");
-                            }
-                        }
+
+                        //to do: Add in editing of specific product
 
                     }
                     Console.WriteLine();
@@ -156,5 +154,88 @@ namespace NorthwindConsole
             }
             logger.Info("Program ended");
         }
+
+        public static Product GetProduct(NWConsole_48_IBFContext db)
+        {
+            // display all blogs
+            var products = db.Products.OrderBy(p => p.ProductId);
+            foreach (Product p in products)
+            {
+                Console.WriteLine($"{p.ProductId}: {p.ProductName}");
+            }
+            if (int.TryParse(Console.ReadLine(), out int ProductId))
+            {
+                Product product = db.Products.FirstOrDefault(p => p.ProductId == ProductId);
+                if (product != null)
+                {
+                    return product;
+                }
+            }
+            logger.Error("Invalid Blog Id");
+            return null;
+        }
+
+        public static Product InputProduct(NWConsole_48_IBFContext db) {
+            var product = new Product();
+            Console.WriteLine("Enter Product Name:");
+            product.ProductName = Console.ReadLine();
+
+            Console.WriteLine("Enter Product Category ID:");
+
+            var query = db.Categories.OrderBy(p => p.CategoryId);
+            Console.ForegroundColor = ConsoleColor.Blue;
+            foreach (var item in query)
+            {
+            Console.WriteLine($"{item.CategoryId}) {item.CategoryName}");
+            }
+            Console.ForegroundColor = ConsoleColor.White;
+            product.ProductId = Convert.ToUInt16(Console.ReadLine());
+
+            Console.WriteLine("Enter Supplier ID:");
+            var query2 = db.Suppliers.OrderBy(p => p.SupplierId);
+            Console.ForegroundColor = ConsoleColor.Blue;
+            foreach (var item in query2)
+            {
+            Console.WriteLine($"{item.SupplierId}) {item.CompanyName}");
+            }
+            Console.ForegroundColor = ConsoleColor.White;
+            product.SupplierId = Convert.ToInt16(Console.ReadLine());
+
+            Console.WriteLine("Enter Unit Price (Decimal):");
+            product.UnitPrice = Convert.ToDecimal(Console.ReadLine());
+
+            Console.WriteLine("Enter Quantity Per Unit:");
+            product.QuantityPerUnit = Console.ReadLine();
+
+            ValidationContext context = new ValidationContext(product, null, null);
+            List<ValidationResult> results = new List<ValidationResult>();
+            var isValid = Validator.TryValidateObject(product, context, results, true);
+                if (isValid)
+                    {
+                        // check for unique name
+                        if (db.Products.Any(p => p.ProductName == product.ProductName))
+                        {
+                            // generate validation error
+                            logger.Error("Vaildation error: {ProductName} already exists.", product.ProductName);
+                            isValid = false;
+                            results.Add(new ValidationResult("Name exists", new string[] { "ProductName" }));
+                        }
+                        else
+                        {
+                            logger.Info("Validation passed");
+                            db.AddProduct(product);
+                            logger.Info("Product added - {name}", product.ProductName);
+                        }
+                    }
+                    if (!isValid)
+                    {
+                        foreach (var result in results)
+                        {
+                            logger.Error($"{result.MemberNames.First()} : {result.ErrorMessage}");
+                        }
+                }
+            return product;
+        }
+
     }
 }

@@ -36,6 +36,17 @@ namespace NorthwindConsole.Model
             this.SaveChanges();
         }
 
+        public void AddProduct(Product product)
+        {
+            this.Products.Add(product);
+            this.SaveChanges();
+        }
+
+        public void EditProduct(Product product)
+        {
+            
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
