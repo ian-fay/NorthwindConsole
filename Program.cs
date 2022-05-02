@@ -22,10 +22,17 @@ namespace NorthwindConsole
                 {
                     Console.WriteLine("1) Display Categories");
                     Console.WriteLine("2) Add Category");
+                    //Edit categories
+                    //Display all Categories in the Categories table (CategoryName and Description)
+                    //Display all Categories and their related active (not discontinued) product data (CategoryName, ProductName)
+                    //Display a specific Category and its related active product data (CategoryName, ProductName)
                     Console.WriteLine("3) Display Category and related products");
                     Console.WriteLine("4) Display all Categories and their related products");
                     Console.WriteLine("5) Add Product");
                     Console.WriteLine("6) Edit Product");
+                    //Display all product records
+                    //Display a specific product
+
                     Console.WriteLine("\"q\" to quit");
                     choice = Console.ReadLine();
                     Console.Clear();
