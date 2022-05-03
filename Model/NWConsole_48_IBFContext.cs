@@ -36,15 +36,24 @@ namespace NorthwindConsole.Model
             this.SaveChanges();
         }
 
+        public void EditCategory(Category UpdatedCategory)
+        {
+            Category category = this.Categories.Find(UpdatedCategory.CategoryId);
+            category.CategoryName = UpdatedCategory.CategoryName;
+            this.SaveChanges();
+        }
+
         public void AddProduct(Product product)
         {
             this.Products.Add(product);
             this.SaveChanges();
         }
 
-        public void EditProduct(Product product)
+        public void EditProduct(Product UpdatedProduct)
         {
-            
+            Product product = this.Products.Find(UpdatedProduct.ProductId);
+            product.ProductName = UpdatedProduct.ProductName;
+            this.SaveChanges();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
