@@ -63,6 +63,7 @@ namespace NorthwindConsole
                         
                         if (category != null) {
                             Category UpdatedCategory = InputCategory(db);
+
                             if(UpdatedCategory != null) {
                                 UpdatedCategory.CategoryId = category.CategoryId;
                                 db.EditCategory(UpdatedCategory);
@@ -217,7 +218,7 @@ namespace NorthwindConsole
                     return product;
                 }
             }
-            logger.Error("Invalid Blog Id");
+            logger.Error("Invalid Product Id");
             return null;
         }
 

@@ -40,6 +40,8 @@ namespace NorthwindConsole.Model
         {
             Category category = this.Categories.Find(UpdatedCategory.CategoryId);
             category.CategoryName = UpdatedCategory.CategoryName;
+            category.CategoryId = UpdatedCategory.CategoryId;
+            category.Description = UpdatedCategory.Description;
             this.SaveChanges();
         }
 
