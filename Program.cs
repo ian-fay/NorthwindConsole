@@ -22,16 +22,18 @@ namespace NorthwindConsole
                 {
                     Console.WriteLine("1) Display Categories");
                     Console.WriteLine("2) Add Category");
-                    //Edit categories
+                    Console.WriteLine("3) Edit Category");
+                    Console.WriteLine("4) Display Categories");
                     //Display all Categories in the Categories table (CategoryName and Description)
                     //Display all Categories and their related active (not discontinued) product data (CategoryName, ProductName)
                     //Display a specific Category and its related active product data (CategoryName, ProductName)
-                    Console.WriteLine("3) Display Category and related products");
-                    Console.WriteLine("4) Display all Categories and their related products");
-                    Console.WriteLine("5) Add Product");
-                    Console.WriteLine("6) Edit Product");
-                    //Display all product records
-                    //Display a specific product
+                    Console.WriteLine("5) Display Category and related products");
+                    Console.WriteLine("6) Display all Categories and their related products");
+                    Console.WriteLine("7) Add Product");
+                    Console.WriteLine("8) Edit Product");
+                    Console.WriteLine("9) Display Products");
+
+                    //TODO: ADD ADDITIONAL NLOG
 
                     Console.WriteLine("\"q\" to quit");
                     choice = Console.ReadLine();
@@ -41,53 +43,29 @@ namespace NorthwindConsole
                     {
                         var db = new NWConsole_48_IBFContext();
                         var query = db.Categories.OrderBy(p => p.CategoryName);
-                        Console.ForegroundColor = ConsoleColor.Green;
+                        //Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine($"{query.Count()} records returned");
-                        Console.ForegroundColor = ConsoleColor.Magenta;
+                        //Console.ForegroundColor = ConsoleColor.Magenta;
                         foreach (var item in query)
                         {
                             Console.WriteLine($"{item.CategoryName} - {item.Description}");
                         }
-                        Console.ForegroundColor = ConsoleColor.White;
+                        //Console.ForegroundColor = ConsoleColor.White;
                     }
                     else if (choice == "2")
                     {
-                        var category = new Category();
-                        Console.WriteLine("Enter Category Name:");
-                        category.CategoryName = Console.ReadLine();
-                        Console.WriteLine("Enter the Category Description:");
-                        category.Description = Console.ReadLine();
-                        ValidationContext context = new ValidationContext(category, null, null);
-                        List<ValidationResult> results = new List<ValidationResult>();
-                        var isValid = Validator.TryValidateObject(category, context, results, true);
-                        if (isValid)
-                        {
-                            var db = new NWConsole_48_IBFContext();
-                            // check for unique name
-                            if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
-                            {
-                                // generate validation error
-                                logger.Error("Vaildation error: {CategoryName} already exists.", category.CategoryName);
-                                isValid = false;
-                                results.Add(new ValidationResult("Name exists", new string[] { "CategoryName" }));
-                            }
-                            else
-                            {
-                                logger.Info("Validation passed");
-                                db.AddCategory(category);
-                                logger.Info("Category added - {name}", category.CategoryName);
-
-                            }
-                        }
-                        if (!isValid)
-                        {
-                            foreach (var result in results)
-                            {
-                                logger.Error($"{result.MemberNames.First()} : {result.ErrorMessage}");
-                            }
+                        var db = new NWConsole_48_IBFContext();
+                        Category category = InputCategory(db);
+                        if(category != null) {
+                            db.AddCategory(category);
+                            logger.Info("Product added - {name}", category.CategoryName);
                         }
                     }
-                    else if (choice == "3")
+                    else if (choice == "3") 
+                    {
+                        Console.WriteLine("Edit Categories.");
+                    }
+                    else if (choice == "4")
                     {
                         var db = new NWConsole_48_IBFContext();
                         var query = db.Categories.OrderBy(p => p.CategoryId);
@@ -109,7 +87,11 @@ namespace NorthwindConsole
                             Console.WriteLine(p.ProductName);
                         }
                     }
-                    else if (choice == "4")
+                    else if(choice == "5") 
+                    {
+                        Console.WriteLine("Display Category and related products.");
+                    }
+                    else if (choice == "6")
                     {
                         var db = new NWConsole_48_IBFContext();
                         var query = db.Categories.Include("Products").OrderBy(p => p.CategoryId);
@@ -122,7 +104,7 @@ namespace NorthwindConsole
                             }
                         }
                     }
-                    else if(choice == "5") {
+                    else if(choice == "7") {
 
                         var db = new NWConsole_48_IBFContext();
                         Product product = InputProduct(db);
@@ -132,7 +114,7 @@ namespace NorthwindConsole
                         }
 
                     }
-                    else if(choice == "6") 
+                    else if(choice == "8") 
                     {
                         Console.WriteLine("Choose Product to Edit:");
                         var db = new NWConsole_48_IBFContext();
@@ -148,7 +130,59 @@ namespace NorthwindConsole
                             }
                         }
 
-                        //to do: Add in editing of specific product
+                    }
+                    else if(choice == "9") 
+                    {
+                        var db = new NWConsole_48_IBFContext();
+                        Console.WriteLine("Choose products to display:");
+                        Console.WriteLine("1) Display all products");
+                        Console.WriteLine("2) Display all discontinued products");
+                        Console.WriteLine("3) Display all active (non-discontinued) products");
+                        Console.WriteLine("4) Display a specific product");
+                        choice = Console.ReadLine();
+
+                        Console.WriteLine("\"q\" to quit");
+
+                        if(choice == "1") 
+                        {
+                            var products = db.Products.OrderBy(p => p.ProductId);
+                            foreach (Product p in products)
+                            {
+                                Console.WriteLine($"{p.ProductName}");
+                            }
+                        }
+                        else if(choice == "2") 
+                        {
+                            var products = db.Products.OrderBy(p => p.ProductId).Where(d => d.Discontinued == true);
+                            foreach (Product p in products)
+                            {
+                                Console.WriteLine($"{p.ProductName}");
+                            }
+                        }
+                        else if(choice == "3")
+                        {
+                            var products = db.Products.OrderBy(p => p.ProductId).Where(d => d.Discontinued == false);
+                            foreach (Product p in products)
+                            {
+                                Console.WriteLine($"{p.ProductName}");
+                            }
+                        }
+                        else if(choice == "4") 
+                        {
+                            Console.WriteLine("Choose a Product to display fully:");
+                            var products = db.Products.OrderBy(p => p.ProductId);
+                            foreach (Product p in products)
+                            {
+                                Console.WriteLine($"{p.ProductId}) {p.ProductName}");
+                            }
+                            int numChoice = Convert.ToInt16(Console.ReadLine());
+
+                            var selection = db.Products.OrderBy(p => p.ProductId).Where(p => p.ProductId == numChoice);
+                            foreach (Product s in selection)
+                            {
+                                Console.WriteLine($"ID:{s.ProductId}\n" + $"Name:{s.ProductName}\n" + $"Supplier ID:{s.SupplierId}\n" +  $"Category ID:{s.CategoryId}\n" + $"Quantity Per Unit:{s.QuantityPerUnit}\n" + $"Unit Price:{s.UnitPrice}\n" + $"Units in Stock:{s.UnitsInStock}\n" + $"Units on Order:{s.UnitsOnOrder}\n" + $"Reorder Level:{s.ReorderLevel}\n" + $"Discontinued:{s.Discontinued}\n");
+                            }
+                        }
 
                     }
                     Console.WriteLine();
@@ -242,6 +276,48 @@ namespace NorthwindConsole
                         }
                 }
             return product;
+        }
+
+        public static Category InputCategory(NWConsole_48_IBFContext db) {
+            var category = new Category();
+            Console.WriteLine("Enter Category Name:");
+            category.CategoryName = Console.ReadLine();
+
+            Console.WriteLine("Enter the Category Description:");
+            category.Description = Console.ReadLine();
+
+            ValidationContext context = new ValidationContext(category, null, null);
+            List<ValidationResult> results = new List<ValidationResult>();
+
+            var isValid = Validator.TryValidateObject(category, context, results, true);
+            if (isValid)
+            {
+                // check for unique name
+                if (db.Categories.Any(c => c.CategoryName == category.CategoryName))
+                {
+                // generate validation error
+                logger.Error("Vaildation error: {CategoryName} already exists.", category.CategoryName);
+                isValid = false;
+                results.Add(new ValidationResult("Name exists", new string[] { "CategoryName" }));
+                }
+                else
+                {
+                logger.Info("Validation passed");
+                db.AddCategory(category);
+                logger.Info("Category added - {name}", category.CategoryName);
+
+                }
+            }
+            if (!isValid)
+
+            {
+            foreach (var result in results)
+                {
+                    logger.Error($"{result.MemberNames.First()} : {result.ErrorMessage}");
+                }
+            }
+            return category;
+
         }
 
     }
