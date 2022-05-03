@@ -23,15 +23,14 @@ namespace NorthwindConsole
                     Console.WriteLine("1) Display Categories");
                     Console.WriteLine("2) Add Category");
                     Console.WriteLine("3) Edit Category");
-                    Console.WriteLine("4) Display Categories");
                     //Display all Categories in the Categories table (CategoryName and Description)
                     //Display all Categories and their related active (not discontinued) product data (CategoryName, ProductName)
                     //Display a specific Category and its related active product data (CategoryName, ProductName)
-                    Console.WriteLine("5) Display Category and related products");
-                    Console.WriteLine("6) Display all Categories and their related products");
-                    Console.WriteLine("7) Add Product");
-                    Console.WriteLine("8) Edit Product");
-                    Console.WriteLine("9) Display Products");
+                    Console.WriteLine("4) Display Category and related products");
+                    Console.WriteLine("5) Display all Categories and their related products");
+                    Console.WriteLine("6) Add Product");
+                    Console.WriteLine("7) Edit Product");
+                    Console.WriteLine("8) Display Products");
 
                     //TODO: ADD ADDITIONAL NLOG
 
@@ -43,14 +42,15 @@ namespace NorthwindConsole
                     {
                         var db = new NWConsole_48_IBFContext();
                         var query = db.Categories.OrderBy(p => p.CategoryName);
-                        //Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine($"{query.Count()} records returned");
-                        //Console.ForegroundColor = ConsoleColor.Magenta;
                         foreach (var item in query)
                         {
-                            Console.WriteLine($"{item.CategoryName} - {item.Description}");
+                            Console.WriteLine($"{item.CategoryId}) {item.CategoryName} - {item.Description}");
+                            logger.Info($"Displaying all Categories.");
                         }
-                        //Console.ForegroundColor = ConsoleColor.White;
+
+                        
+
                     }
                     else if (choice == "2")
                     {
@@ -87,11 +87,7 @@ namespace NorthwindConsole
                             Console.WriteLine(p.ProductName);
                         }
                     }
-                    else if(choice == "5") 
-                    {
-                        Console.WriteLine("Display Category and related products.");
-                    }
-                    else if (choice == "6")
+                    else if (choice == "5")
                     {
                         var db = new NWConsole_48_IBFContext();
                         var query = db.Categories.Include("Products").OrderBy(p => p.CategoryId);
@@ -104,7 +100,7 @@ namespace NorthwindConsole
                             }
                         }
                     }
-                    else if(choice == "7") {
+                    else if(choice == "6") {
 
                         var db = new NWConsole_48_IBFContext();
                         Product product = InputProduct(db);
@@ -114,7 +110,7 @@ namespace NorthwindConsole
                         }
 
                     }
-                    else if(choice == "8") 
+                    else if(choice == "7") 
                     {
                         Console.WriteLine("Choose Product to Edit:");
                         var db = new NWConsole_48_IBFContext();
@@ -131,7 +127,7 @@ namespace NorthwindConsole
                         }
 
                     }
-                    else if(choice == "9") 
+                    else if(choice == "8") 
                     {
                         var db = new NWConsole_48_IBFContext();
                         Console.WriteLine("Choose products to display:");
@@ -150,6 +146,7 @@ namespace NorthwindConsole
                             {
                                 Console.WriteLine($"{p.ProductName}");
                             }
+                            logger.Info($"Displaying all products");
                         }
                         else if(choice == "2") 
                         {
@@ -158,6 +155,7 @@ namespace NorthwindConsole
                             {
                                 Console.WriteLine($"{p.ProductName}");
                             }
+                            logger.Info($"Displaying discontinued products");
                         }
                         else if(choice == "3")
                         {
@@ -166,6 +164,7 @@ namespace NorthwindConsole
                             {
                                 Console.WriteLine($"{p.ProductName}");
                             }
+                            logger.Info($"Displaying all non-discontinued products");
                         }
                         else if(choice == "4") 
                         {
@@ -181,7 +180,9 @@ namespace NorthwindConsole
                             foreach (Product s in selection)
                             {
                                 Console.WriteLine($"ID:{s.ProductId}\n" + $"Name:{s.ProductName}\n" + $"Supplier ID:{s.SupplierId}\n" +  $"Category ID:{s.CategoryId}\n" + $"Quantity Per Unit:{s.QuantityPerUnit}\n" + $"Unit Price:{s.UnitPrice}\n" + $"Units in Stock:{s.UnitsInStock}\n" + $"Units on Order:{s.UnitsOnOrder}\n" + $"Reorder Level:{s.ReorderLevel}\n" + $"Discontinued:{s.Discontinued}\n");
+                                logger.Info($"Displaying {s.ProductName}");
                             }
+
                         }
 
                     }
